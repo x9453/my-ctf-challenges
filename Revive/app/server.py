@@ -4,14 +4,13 @@ import sys
 import traceback
 import logging
 
-# logging
-LOG_FILE = os.environ['LOG_FILE']
-logging.basicConfig(format='%(asctime)s\t%(message)s', filename=LOG_FILE, level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 # server settings
-AES_KEY = os.environ['AES_KEY'].encode()
-HMAC_KEY = os.environ['HMAC_KEY'].encode()
-TIMEOUT = int(os.environ['TIMEOUT'])
+AES_KEY = os.urandom(16)
+HMAC_KEY = os.urandom(32)
+TIMEOUT = 120
+
 MENU = '''
    ___           _         
   / _ \___ _  __(_)  _____ 
@@ -25,13 +24,14 @@ MENU = '''
 
 '''
 TOPIC = 'SendFlag'
-FLAG = os.environ['FLAG']
 
 # get contract source and interface
-SRC_FILE = os.environ['SRC_FILE']
-with open(SRC_FILE, 'r') as f:
+with open('/app/sample.sol', 'r') as f:
     SRC_TEXT = f.read()
 CONT_IF = compile_from_src(SRC_TEXT.replace('RN', '0'))
+
+with open('/app/flag.txt', 'r') as f:
+    FLAG = f.read()
 
 def challenge(self):
     # get player's choice
@@ -107,7 +107,7 @@ def challenge(self):
         # check if transaction emitted TOPIC
         res = check_if_has_topic(addr, tx_hash, CONT_IF, TOPIC)
         if res:
-            self.request.sendall((FLAG+'\n').encode())
+            self.request.sendall(FLAG.encode())
         else:
             self.request.sendall('Nope\n'.encode())
         status = 'Solved' if res else 'Failed'
@@ -139,4 +139,6 @@ if __name__ == '__main__':
     socketserver.TCPServer.allow_reuse_address = True
     server = ThreadedTCPServer(('0.0.0.0', 12345), MyTCPHandler)
     logging.info('Server: start running...')
+    logging.info(f'Server: AES_KEY = {AES_KEY.hex()}')
+    logging.info(f'Server: HMAC_KEY = {HMAC_KEY.hex()}')
     server.serve_forever()
