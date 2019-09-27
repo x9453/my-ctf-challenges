@@ -1,5 +1,7 @@
 from util import *
 import socketserver
+import secrets
+import hashlib
 import sys
 import traceback
 import logging
@@ -9,6 +11,7 @@ logging.basicConfig(level=logging.INFO)
 # server settings
 AES_KEY = os.urandom(16)
 HMAC_KEY = os.urandom(32)
+DIFFICULTY = 18
 TIMEOUT = 120
 
 MENU = '''
@@ -22,6 +25,8 @@ MENU = '''
 3. Request for flag
 4. Get game contract source code
 
+Game environment: Ropsten testnet
+
 '''
 TOPIC = 'SendFlag'
 
@@ -32,6 +37,21 @@ CONT_IF = compile_from_src(SRC_TEXT.replace('RN', '0'))
 
 with open('/app/flag.txt', 'r') as f:
     FLAG = f.read()
+
+def PoW(self):
+    # PoW challenge
+    prefix = secrets.token_urlsafe(16)
+    self.request.sendall(f'sha256({prefix} + ???) == {"0"*DIFFICULTY}({DIFFICULTY})...\n'.encode())
+    self.request.sendall('??? = '.encode())
+    pow_answer = self.request.recv(1024).strip()
+
+    # check PoW answer
+    h = hashlib.sha256()
+    h.update(prefix.encode() + pow_answer)
+    bits = ''.join(bin(i)[2:].zfill(8) for i in h.digest())
+    zeros = '0' * DIFFICULTY
+    if bits[:DIFFICULTY] != zeros:
+        exit()
 
 def challenge(self):
     # get player's choice
@@ -49,7 +69,8 @@ def challenge(self):
         data = acct.address.encode() + acct.key
         token = encrypt_then_mac(data, AES_KEY, HMAC_KEY)
         self.request.sendall(f'Your token: {token}\n'.encode())
-        logging.info('GenAcc: acct = %s', acct.address)
+        self.request.sendall('Please send enough ether to your game account in order to deploy a game contract\n'.encode())
+        logging.info('GenAcc: acct = %s, key = %s', acct.address, acct.key.hex())
 
     elif ch == 2:
         # validate token
@@ -81,12 +102,13 @@ def challenge(self):
             raise err
 
         self.request.sendall(f'Transaction hash: {tx_hash.hex()}\n'.encode())
-        self.request.sendall(f'Your goal is to emit the `{TOPIC}` event in the game contract\n'.encode())
 
         # generate new token
         data = acct.address.encode() + acct.key + tx_hash
         new_token = encrypt_then_mac(data, AES_KEY, HMAC_KEY)
         self.request.sendall(f'Your new token: {new_token}\n'.encode())
+
+        self.request.sendall(f'Your goal is to emit the `{TOPIC}` event in the game contract\n'.encode())
         logging.info('Deployed: acct = %s, tx_hash = %s', acct.address, tx_hash.hex())
 
     elif ch == 3:
@@ -126,7 +148,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         self.request.settimeout(TIMEOUT)
-        #PoW()
+        PoW(self)
         try:
             challenge(self)
         except:
