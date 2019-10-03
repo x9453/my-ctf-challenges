@@ -1,6 +1,6 @@
 pragma solidity ^0.5.10;
 
-contract Revive {
+contract Creativity {
     event SendFlag(address addr);
     
     address public target;
