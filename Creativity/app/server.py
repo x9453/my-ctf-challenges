@@ -32,7 +32,7 @@ Game environment: Ropsten testnet
 TOPIC = 'SendFlag'
 
 # get contract source and interface
-with open('/app/sample.sol', 'r') as f:
+with open('/app/Creativity.sol', 'r') as f:
     SRC_TEXT = f.read()
 CONT_IF = compile_from_src(SRC_TEXT.replace('RN', '0'))
 
