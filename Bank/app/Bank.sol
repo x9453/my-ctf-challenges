@@ -5,7 +5,7 @@ contract Bank {
     event SendFlag(address addr);
     
     address public owner;
-    uint randomNumber = 0;
+    uint randomNumber = RN;
     
     constructor() public {
         owner = msg.sender;

@@ -4,7 +4,7 @@ contract Creativity {
     event SendFlag(address addr);
     
     address public target;
-    uint randomNumber = 0;
+    uint randomNumber = RN;
     
     function check(address _addr) public {
         uint size;
