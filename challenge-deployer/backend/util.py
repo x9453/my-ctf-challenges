@@ -11,7 +11,10 @@ import os
 INFURA_PROJ_ID = os.environ['INFURA_PROJ_ID']
 w3 = Web3(WebsocketProvider(f'wss://ropsten.infura.io/ws/v3/{INFURA_PROJ_ID}'))
 
-# aes and hmac
+# misc
+def get_rand_number(nb):
+    return int.from_bytes(os.urandom(nb), 'little')
+
 def encrypt_then_mac(data, aes_key, hmac_key):
     cipher = AES.new(aes_key, AES.MODE_CBC)
     msg = cipher.iv + cipher.encrypt(pad(data, AES.block_size))
@@ -28,11 +31,10 @@ def validate_then_decrypt(token, aes_key, hmac_key):
     data = unpad(cipher.decrypt(ct), AES.block_size)
     return data
 
-# solc
-def compile_from_src(source):
+def compile_from_src(source, cont_name):
+    source = source.replace('RN', str(get_rand_number(16)))
     compiled_sol = compile_source(source)
-    _, cont_if = compiled_sol.popitem()
-    return cont_if
+    return compiled_sol[cont_name]
 
 # web3
 def get_deploy_est_gas(cont_if):
@@ -66,7 +68,11 @@ def get_cont_addr(tx_hash):
     assert tx_receipt != None
     return tx_receipt['contractAddress']
 
-def check_if_has_topic(addr, tx_hash, cont_if, topic):
+def get_public_var(addr, cont_if, var_name):
+    contract = w3.eth.contract(address=addr, abi=cont_if['abi'])
+    return contract.functions[var_name]().call()
+
+def check_has_topic(addr, cont_if, tx_hash, topic):
     contract = w3.eth.contract(abi=cont_if['abi'])
     tx_receipt = w3.eth.getTransactionReceipt(tx_hash)
     logs = contract.events[topic]().processReceipt(tx_receipt)
