@@ -14,10 +14,10 @@
 
 ### Election
 
-* [Source files]()
+* [Source files](balsn-ctf-2020/Election)
 * [Write-up]()
 
 ### IdleGame
 
-* [Source files]()
+* [Source files](balsn-ctf-2020/IdleGame)
 * [Write-up]()
