@@ -8,8 +8,9 @@ import hmac
 import os
 
 # connect to node
-INFURA_PROJ_ID = os.environ['INFURA_PROJ_ID']
-w3 = Web3(WebsocketProvider(f'wss://ropsten.infura.io/ws/v3/{INFURA_PROJ_ID}'))
+INFURA_PROJ_ID = os.environ['INFURA_PROJ_ID'].strip()
+DEPLOY_NETWORK = os.environ['DEPLOY_NETWORK'].lower().strip()
+w3 = Web3(WebsocketProvider(f'wss://{DEPLOY_NETWORK}.infura.io/ws/v3/{INFURA_PROJ_ID}'))
 
 # misc
 def get_rand_number(nb):
@@ -50,7 +51,6 @@ def contract_deploy(acct, cont_if, gas_price, value):
         bytecode=cont_if['bin']
     )
     construct_tx = instance.constructor().buildTransaction({
-        'chainId': 3, # ropsten
         'from': acct.address,
         'nonce': w3.eth.getTransactionCount(acct.address),
         'value': w3.toWei(value, 'ether'),

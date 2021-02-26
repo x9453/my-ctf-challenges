@@ -26,8 +26,8 @@ with open(f'/app/{CHAL_FILE}', 'r') as f:
 with open('/app/art.txt', 'r') as f:
     ART_TEXT = f.read()
 
-MENU = ART_TEXT + '''
-All game contracts will be deployed on ** Ropsten Testnet **
+MENU = ART_TEXT + f'''
+All game contracts will be deployed on ** {DEPLOY_NETWORK} testnet **
 Please follow the instructions below:
 
 1. Create a game account
