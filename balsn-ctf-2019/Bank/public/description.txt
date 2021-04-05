@@ -1,0 +1,1 @@
+Again, as those ctfs did in the past, we also implemented our 100% secure bank system, but on blockchain this time.
