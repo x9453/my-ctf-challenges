@@ -15,9 +15,15 @@
 ### Election
 
 * [Source files](balsn-ctf-2020/Election)
-* [Write-up]()
+* [Write-up](https://x9453.github.io/2021/02/27/Balsn-CTF-2020-Election/)
 
 ### IdleGame
 
 * [Source files](balsn-ctf-2020/IdleGame)
-* [Write-up]()
+* [Write-up](https://x9453.github.io/2021/03/12/Balsn-CTF-2020-IdleGame/)
+
+## AIS3 EOF CTF 2020 Quals
+
+### Chameleon
+
+* [Source files](ais3-eof-ctf-2020-quals/Chameleon)
